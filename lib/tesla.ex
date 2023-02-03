@@ -518,12 +518,14 @@ defmodule Tesla do
       "http://api.example.com?user=3&page=2&status=true"
 
   """
-  @spec build_url(Tesla.Env.url(), Tesla.Env.query()) :: binary
-  def build_url(url, []), do: url
+  @spec build_url(Tesla.Env.url(), Tesla.Env.query(), (Enumerable.t() -> String.t())) :: binary
+  def build_url(url, query, encoder \\ &encode_query/1)
 
-  def build_url(url, query) do
+  def build_url(url, [], _encoder), do: url
+
+  def build_url(url, query, encoder) do
     join = if String.contains?(url, "?"), do: "&", else: "?"
-    url <> join <> encode_query(query)
+    url <> join <> encoder.(query)
   end
 
   def encode_query(query) do
